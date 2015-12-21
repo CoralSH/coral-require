@@ -1,8 +1,12 @@
 #!/bin/sh
 
+source $(coral bootstrap)
+
+require "coral-util"
+
 require() {
   for package in "$@"; do
-    modules_directory=$(get_modules_directory)
+    modules_directory=$(coral-util get_modules_directory)
 
     package_directory="$modules_directory/shell_modules/$package"
 
