@@ -91,8 +91,11 @@ require_file() {
     esac
   done
 
+
+  echo "main|\"\") _${package_no_hyphen}_main \"\${@:2}\" ;;" >> "$temporary"
+
   # todo: add error formatting/logging
-  echo "*) echo \"\$1 doesn't exist!\" ;;" >> "$temporary"
+  echo "*) echo \"\${package}.\$1 doesn't exist!\"; exit; ;;" >> "$temporary"
 
   echo "esac" >> "$temporary"
   echo "}" >> "$temporary"
