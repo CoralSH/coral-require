@@ -1,55 +1,113 @@
 #!/bin/sh
 
-source $(coral bootstrap)
-
-require "coral-util"
-
 require() {
   for package in "$@"; do
-    modules_directory=$(coral-util get_modules_directory)
+    case "$package" in
+      "./"*)
+        package="${package//.\//}"
+        package_path="$(pwd)/$package.sh"
 
-    package_directory="$modules_directory/shell_modules/$package"
+        if [ -f "$package_path" ]; then
+          require_file "$package" "$package_path"
+          continue
+        fi
 
-    if [ ! -d "$package_directory" ]; then
-      echo "no package \"$package\"!"
-      exit
-    fi
+        if [ -d "$package" ]; then
+          package_path="$(pwd)/$package/index.sh"
+          require_file "$package" "$package_path"
+          continue
+        fi
+        ;;
+      *)
+        modules_directory=$(pwd)
 
-    if [ ! -f "$package_directory/package.sh" ]; then
-      echo "no package.json!"
-      exit
-    fi
+        while [ ! -f "$modules_directory/package.sh" ]; do
+          modules_directory=${modules_directory%/*}
+          if [ "$modules_directory" = "/" ]; then
+            echo "couldn't find shell_modules"
+            exit
+          fi
+        done
 
-    source "$package_directory/package.sh"
-    main=${main:-"index.sh"}
-    entry_point="$package_directory/$main"
+        cd $modules_directory
 
-    if [ ! -f "$entry_point" ]; then
-      echo "couldn't find entry point for $package"
-      exit
-    fi
+        if [ ! -d "shell_modules" ]; then
+          mkdir "shell_modules"
+        fi
 
-    source "$entry_point"
+        package_directory="$modules_directory/shell_modules/$package"
 
-    temporary="tmp.sh"
+        if [ ! -d "$package_directory" ]; then
+          echo "no package \"$package\"!"
+          exit
+        fi
 
-    echo "$1() {" >> "$temporary"
-    echo "case \"\$1\" in" >> "$temporary"
+        if [ ! -f "$package_directory/package.sh" ]; then
+          echo "no package.json!"
+          exit
+        fi
 
-    functions_string=$(compgen -A function)
-    functions=${functions_string//$'\n'/ }
-    for function in $functions; do
-      if [ "$function" != "require" ]; then
-        echo "$function) $function \"\${@:2}\" ;;" >> "$temporary"
-      fi
-    done
+        . "$package_directory/package.sh"
+        main=${main:-"index.sh"}
+        entry_point="$package_directory/$main"
 
-    echo "*) \$(\"\$1\") ;;" >> "$temporary"
-
-    echo "esac" >> "$temporary"
-    echo "}" >> "$temporary"
-
-    source "$temporary"
-    rm "$temporary"
+        require_file "$package" "$entry_point"
+        ;;
+    esac
   done
+}
+
+require_file() {
+  package="$1"
+  file="$2"
+
+  if [ ! -f "$file" ]; then
+    echo "couldn't find $package"
+    exit
+  fi
+
+  . "$file"
+
+  temporary="/tmp/$$"
+
+  package_no_hyphen=${package//-/_}
+  echo "$package_no_hyphen() {" >> "$temporary"
+  echo "case \"\$1\" in" >> "$temporary"
+
+  functions_string=$(compgen -A function)
+  functions=${functions_string//$'\n'/ }
+  for function in $functions; do
+    case "$function" in
+      require|require_file|copy_function|rename_function|_*)
+        continue
+        ;;
+
+      *)
+        new_function="_${package_no_hyphen}_${function}"
+        rename_function "$function" "$new_function"
+
+        echo "$function) $new_function \"\${@:2}\" ;;" >> "$temporary"
+        ;;
+    esac
+  done
+
+  # todo: add error formatting/logging
+  echo "*) echo \"\$1 doesn't exist!\" ;;" >> "$temporary"
+
+  echo "esac" >> "$temporary"
+  echo "}" >> "$temporary"
+
+  echo "alias \"$package\"=\"$package_no_hyphen\"" >> "$temporary"
+
+  . "$temporary"
+}
+
+copy_function() {
+  test -n "$(declare -f $1)" || return
+  eval "${_/$1/$2}"
+}
+
+rename_function() {
+  copy_function "$@" || return
+  unset -f "$1"
 }
