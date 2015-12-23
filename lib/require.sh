@@ -49,20 +49,19 @@ require() {
 
         . "$package_directory/package.sh"
         main=${main:-"index.sh"}
-        entry_point="$package_directory/$main"
+        package_path="$package_directory/$main"
 
-        require_file "$package" "$entry_point"
+        require_file "$package" "$package_path"
         ;;
     esac
   done
 }
 
 require_file() {
-  package="$1"
   file="$2"
 
   if [ ! -f "$file" ]; then
-    echo "couldn't find $package"
+    echo "couldn't find $1"
     exit
   fi
 
@@ -70,7 +69,7 @@ require_file() {
 
   temporary="/tmp/$$"
 
-  package_no_hyphen=${package//-/_}
+  package_no_hyphen=${1//-/_}
   echo "$package_no_hyphen() {" >> "$temporary"
   echo "case \"\$1\" in" >> "$temporary"
 
@@ -95,12 +94,12 @@ require_file() {
   echo "main|\"\") _${package_no_hyphen}_main \"\${@:2}\" ;;" >> "$temporary"
 
   # todo: add error formatting/logging
-  echo "*) echo \"\${package}.\$1 doesn't exist!\"; exit; ;;" >> "$temporary"
+  echo "*) echo \"${1}.\$1 doesn't exist!\"; exit; ;;" >> "$temporary"
 
   echo "esac" >> "$temporary"
   echo "}" >> "$temporary"
 
-  echo "alias \"$package\"=\"$package_no_hyphen\"" >> "$temporary"
+  echo "alias \"$1\"=\"$package_no_hyphen\"" >> "$temporary"
 
   . "$temporary"
 }
@@ -112,5 +111,4 @@ copy_function() {
 
 rename_function() {
   copy_function "$@" || return
-  unset -f "$1"
 }
