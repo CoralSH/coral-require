@@ -74,7 +74,7 @@ require_file() {
   echo "case \"\$1\" in" >> "$temporary"
 
   functions_string=$(compgen -A function)
-  functions=${functions_string//$'\n'/ }
+  functions=$(sed ':a;N;$!ba;s/\n/ /g' <<< $functions_string)
   for function in $functions; do
     case "$function" in
       require|require_file|copy_function|rename_function|_*)
