@@ -90,7 +90,6 @@ require_file() {
     esac
   done
 
-
   echo "main|\"\") _${package_no_hyphen}_main \"\${@:2}\" ;;" >> "$temporary"
 
   # todo: add error formatting/logging
