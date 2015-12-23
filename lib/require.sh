@@ -4,7 +4,7 @@ require() {
   for package in "$@"; do
     case "$package" in
       "./"*)
-        package="${package//.\//}"
+        package="${package#.\/}"
         package_path="$(pwd)/$package.sh"
 
         if [ -f "$package_path" ]; then
