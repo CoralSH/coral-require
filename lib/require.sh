@@ -86,7 +86,7 @@ require_file() {
 
       *)
         new_function="_${package_no_hyphen}_${function}"
-        rename_function "$function" "$new_function"
+        alias $new_function="$function"
 
         echo "$function) $new_function \"\${@:2}\" ;;" >> "$temporary"
         ;;
@@ -104,13 +104,4 @@ require_file() {
   echo "alias \"$1\"=\"$package_no_hyphen\"" >> "$temporary"
 
   . "$temporary"
-}
-
-copy_function() {
-  test -n "$(declare -f $1)" || return
-  eval "${_/$1/$2}"
-}
-
-rename_function() {
-  copy_function "$@" || return
 }
