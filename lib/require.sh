@@ -17,6 +17,9 @@ require() {
           require_file "$package" "$package_path"
           continue
         fi
+
+        echo "couldn't find $package"
+        exit
         ;;
       *)
         modules_directory=$(pwd)
