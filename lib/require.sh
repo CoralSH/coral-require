@@ -87,6 +87,7 @@ require_file() {
 
       *)
         new_function="_${RANDOM}_${package_no_hyphen}_${function}"
+        [ "$function" = "main" ] && new_main_function="$new_function"
         alias $new_function="$function"
 
         echo "$function) $new_function \"\${@:2}\" ;;" >> "$temporary"
@@ -94,7 +95,7 @@ require_file() {
     esac
   done
 
-  echo "main|\"\") _${package_no_hyphen}_main \"\${@:2}\" ;;" >> "$temporary"
+  echo "main|\"\") ${new_main_function} \"\${@:2}\" ;;" >> "$temporary"
 
   # todo: add error formatting/logging
   echo "*) echo \"${1}.\$1 doesn't exist!\"; exit; ;;" >> "$temporary"
