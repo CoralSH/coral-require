@@ -85,7 +85,7 @@ require_file() {
         ;;
 
       *)
-        new_function="_${package_no_hyphen}_${function}"
+        new_function="_${RANDOM}_${package_no_hyphen}_${function}"
         alias $new_function="$function"
 
         echo "$function) $new_function \"\${@:2}\" ;;" >> "$temporary"
