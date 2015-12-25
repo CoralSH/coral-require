@@ -1,11 +1,20 @@
 #!/bin/sh
 
 require() {
+  packages=()
+  package_paths=()
+
   for package in "$@"; do
     case "$package" in
       "./"*)
         package="${package#.\/}"
-        package_path="$(pwd)/$package.sh"
+        followed=$(ls -l ${BASH_SOURCE[1]})
+        if [ "$followed" != "${followed%"->"*}" ]; then
+          followed="${followed#*"-> "}"
+        else
+          followed="${BASH_SOURCE[1]}"
+        fi
+        package_path="$(dirname "$followed")/$package.sh"
 
         if [ -f "$package_path" ]; then
           require_file "$package" "$package_path"
@@ -13,7 +22,7 @@ require() {
         fi
 
         if [ -d "$package" ]; then
-          package_path="$(pwd)/$package/index.sh"
+          package_path="$(dirname $followed)/$package/index.sh"
           require_file "$package" "$package_path"
           continue
         fi
@@ -22,6 +31,14 @@ require() {
         exit
         ;;
       *)
+        followed=$(ls -l ${BASH_SOURCE[1]})
+        if [ "$followed" != "${followed%"->"*}" ]; then
+          followed="${followed#*"-> "}"
+        else
+          followed="${BASH_SOURCE[1]}"
+        fi
+        modules_directory="$(dirname "$followed")"
+        cd $modules_directory
         modules_directory=$(pwd)
 
         while [ ! -f "$modules_directory/package.sh" ]; do
@@ -53,6 +70,9 @@ require() {
         . "$package_directory/package.sh"
         main=${main:-"index.sh"}
         package_path="$package_directory/$main"
+
+        packages=("${packages[@]} $package")
+        package_paths=("${package_paths[@]} $package_path")
 
         require_file "$package" "$package_path"
         ;;
