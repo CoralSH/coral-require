@@ -4,6 +4,8 @@ require() {
   packages=()
   package_paths=()
 
+  local starting_dir="$(pwd)"
+
   for package in "$@"; do
     case "$package" in
       "./"*)
@@ -56,6 +58,7 @@ require() {
         fi
 
         package_directory="$modules_directory/shell_modules/$package"
+        cd $starting_dir
 
         if [ ! -d "$package_directory" ]; then
           echo "no package \"$package\"!"
