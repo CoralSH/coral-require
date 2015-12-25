@@ -58,7 +58,6 @@ require() {
         fi
 
         package_directory="$modules_directory/shell_modules/$package"
-        cd $starting_dir
 
         if [ ! -d "$package_directory" ]; then
           echo "no package \"$package\"!"
@@ -100,9 +99,7 @@ require_file() {
   echo "case \"\$1\" in" >> "$temporary"
 
   functions_string=$(compgen -A function)
-  functions=$(echo "$functions_string" | sed ':a;N;$!ba;s/
-  / /g')
-  for function in $functions; do
+  for function in $functions_string; do
     case "$function" in
       require|require_file|copy_function|rename_function|_*)
         continue
