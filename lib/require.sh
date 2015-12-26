@@ -39,7 +39,7 @@ require() {
         else
           followed="${BASH_SOURCE[1]}"
         fi
-        modules_directory="$(pwd)/$(dirname "$followed")"
+        modules_directory="$(dirname "$followed")"
         cd "$modules_directory"
         modules_directory=$(pwd)
 
