@@ -110,7 +110,12 @@ require_file() {
         ;;
 
       *)
-        new_function="_${RANDOM}_${package_no_hyphen}_${function}"
+        old_function="_${RANDOM}_$function"
+        old_function_definition="$(declare -f $function)"
+        eval "${old_function_definition/$function/old_function}"
+        alias $old_function="$function"
+
+        new_function="_${RANDOM}_${package_no_hyphen}_${old_function}"
         [ "$function" = "main" ] && new_main_function="$new_function"
         alias $new_function="$function"
 
