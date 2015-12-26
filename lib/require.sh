@@ -39,8 +39,8 @@ require() {
         else
           followed="${BASH_SOURCE[1]}"
         fi
-        modules_directory="$(dirname "$followed")"
-        cd $modules_directory
+        modules_directory="$(pwd)/$(dirname "$followed")"
+        cd "$modules_directory"
         modules_directory=$(pwd)
 
         while [ ! -f "$modules_directory/package.sh" ]; do
@@ -129,5 +129,6 @@ require_file() {
 
   echo "alias \"$1\"=\"$package_no_hyphen\"" >> "$temporary"
 
+  cd "$starting_dir"
   . "$temporary"
 }
