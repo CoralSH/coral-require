@@ -20,7 +20,7 @@ require() {
 
         if [ -f "$package_path" ]; then
           if command -v "$package" >/dev/null 2>&1; then
-            echo "$package is already defined on your system"
+            printf "\e[0;96mcoral\e[0m \e[0;31mERR!\e[0m \e[0;35mrequire\e[0m \"$package\" is already defined on your system!\n"
             continue
           fi
           require_file "$package" "$package_path"
@@ -30,7 +30,7 @@ require() {
         if [ -d "$package" ]; then
           package_path="$(dirname $followed)/$package/index.sh"
           if command -v "$package" >/dev/null 2>&1; then
-            echo "$package is already defined on your system"
+            printf "\e[0;96mcoral\e[0m \e[0;31mERR!\e[0m \e[0;35mrequire\e[0m \"$package\" is already defined on your system!\n"
             continue
           fi
           require_file "$package" "$package_path"
@@ -89,7 +89,7 @@ require() {
         package_paths=("${package_paths[@]} $package_path")
 
         if command -v "$package" >/dev/null 2>&1; then
-          echo "$package is already defined on your system"
+          printf "\e[0;96mcoral\e[0m \e[0;31mERR!\e[0m \e[0;35mrequire\e[0m \"$package\" is already defined on your system!\n"
           continue
         fi
         require_file "$package" "$package_path"
