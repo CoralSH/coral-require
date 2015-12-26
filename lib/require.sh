@@ -59,10 +59,14 @@ require() {
 
         package_directory="$modules_directory/shell_modules/$package"
 
-        if [ ! -d "$package_directory" ]; then
-          echo "no package \"$package\"!"
-          exit
-        fi
+        while [ ! -d "$package_directory" ]; do
+          modules_directory=${modules_directory%/*}
+          package_directory="$modules_directory/shell_modules/$package"
+          if [ "$package_directory" = "/" ]; then
+            echo "no package \"$package\"!"
+            exit
+          fi
+        done
 
         if [ ! -f "$package_directory/package.sh" ]; then
           echo "no package.json!"
