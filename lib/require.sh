@@ -19,12 +19,20 @@ require() {
         package_path="$(dirname "$followed")/$package.sh"
 
         if [ -f "$package_path" ]; then
+          if command -v "$package" >/dev/null 2>&1; then
+            echo "$package is already defined on your system"
+            continue
+          fi
           require_file "$package" "$package_path"
           continue
         fi
 
         if [ -d "$package" ]; then
           package_path="$(dirname $followed)/$package/index.sh"
+          if command -v "$package" >/dev/null 2>&1; then
+            echo "$package is already defined on your system"
+            continue
+          fi
           require_file "$package" "$package_path"
           continue
         fi
@@ -80,6 +88,10 @@ require() {
         packages=("${packages[@]} $package")
         package_paths=("${package_paths[@]} $package_path")
 
+        if command -v "$package" >/dev/null 2>&1; then
+          echo "$package is already defined on your system"
+          continue
+        fi
         require_file "$package" "$package_path"
         ;;
     esac
@@ -112,8 +124,9 @@ require_file() {
       *)
         old_function="_${RANDOM}_$function"
         old_function_definition="$(declare -f $function)"
-        eval "${old_function_definition/$function/old_function}"
-        alias $old_function="$function"
+        eval "${old_function_definition/$function/$old_function}"
+        unset -f "$function"
+        alias $function="$old_function"
 
         new_function="_${RANDOM}_${package_no_hyphen}_${old_function}"
         [ "$function" = "main" ] && new_main_function="$new_function"
